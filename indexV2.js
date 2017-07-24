@@ -135,3 +135,105 @@ function getAge(birth, death) {
     }
     return age;
 }
+
+var http = require('http')
+var querystring = require('querystring')
+var postData = querystring.stringify({
+  'displayname': 'Adam West'
+})
+
+class Celeb {
+  
+  constructor(data) { // param is a dict. all values are in string format, DOB & DOD are DD/MM/YYYY 
+    this.birth = this.dateConst(data.DOB)
+    this.death = this.dateConst(data.DOD)
+    this.field = data.field
+    this.info = data.info
+    this.cause = this.causeConst(data.cause)
+  }
+
+  dateConst(day) {
+    
+    let _day = day.split('/'),
+      _date = new Date(_day[2],_day[0],_day[1])
+    
+    if (_date == 'Invalid Date'){return null}
+    
+    return _date
+  }
+
+  causeConst(cause) {
+    
+    if (cause.length > 20) {return 'Unknown'}
+    
+    return cause
+  }
+}
+
+function pathGen (nameStr) {  // function used to take the celeb's name and generate the path for http GET command
+  
+  var splitName = nameStr.split(' ')
+
+  if (splitName.length > 2) {
+    splitName[0] = splitName[0] + '+' + splitName[1]
+    splitName[1] = splitName[2]
+  }
+
+  return `/dead.nsf/${splitName[1].charAt(0).toLowerCase()}names-nf/${splitName[1] + '+' + splitName[0]}`
+}
+
+function dataParse (rawData) { // Parse the desired data from the downloaded data
+
+  let idxField = rawData.indexOf('Field:') + 31,
+    idxFieldEnd = rawData.indexOf('<br>', idxField),
+    idxInfo = rawData.indexOf('Info:') + 30,
+    idxInfoEnd = rawData.indexOf('</td>', idxInfo),
+    idxDeath = rawData.indexOf('Date of Death:') + 39,          // find start of date string
+    offset = (idxDeath == 38)? 63 : 39,                         // if celeb is alive idxDeath == 38, offset = 63 if alive, 39 if dead
+    idxBirth = rawData.indexOf('Date of Birth:') + offset,      // find start of date string
+    idxCause = rawData.indexOf('Cause of Death', idxDeath) + 46, // find start of cause string
+    idxCauseEnd = rawData.indexOf('</td>', idxCause) 
+               // find end of cause string
+  return {
+    field: rawData.slice(idxField, idxFieldEnd),
+    info: rawData.slice(idxInfo,idxInfoEnd),
+    cause: rawData.slice(idxCause,idxCauseEnd),
+    DOB: rawData.slice(idxBirth, idxBirth + 10),
+    DOD: rawData.slice(idxDeath, idxDeath + 10)
+  }
+}
+
+const options = {
+  name: 'Adam West',
+  hostname: 'www.deadoraliveinfo.com',
+  port: 80,
+  path: pathGen('Jimmy Carter'),
+  method: 'GET'
+};
+
+console.log('PATH: ', options.path)
+
+const req = http.request(options, (res) => {
+  console.log(`STATUS: ${res.statusCode}`)
+  console.log(`HEADERS: ${JSON.stringify(res.headers)}`)
+  res.setEncoding('utf8');
+  let rawData = ''
+  res.on('data', (chunk) => {
+    rawData += chunk
+  });
+  res.on('end', () => {
+    try {
+      var celeb = new Celeb(dataParse(rawData))
+      console.log('CELEB', celeb)
+    } catch (e) {
+      console.error(`ERROR: ${e.message}`)
+    }
+  })
+});
+
+req.on('error', (e) => {
+  console.error(`problem with request: ${e.message}`);
+});
+
+req.write(postData)
+req.end();
