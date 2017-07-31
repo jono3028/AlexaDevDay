@@ -1,0 +1,33 @@
+{
+  "intents": [
+    {
+      "name": "AliveOrDeadIntent",
+      "samples": [
+        "is {name} alive or dead",
+        "alive or dead {name}",
+        "is {name} alive",
+        "is {name} dead",
+        "is {name} still alive"
+      ],
+      "slots": [
+        {
+          "name": "name",
+          "type": "AMAZON.Actor",
+          "samples": []
+        }
+      ]
+    },
+    {
+      "name": "AMAZON.CancelIntent",
+      "samples": []
+    },
+    {
+      "name": "AMAZON.HelpIntent",
+      "samples": []
+    },
+    {
+      "name": "AMAZON.StopIntent",
+      "samples": []
+    }
+  ]
+}

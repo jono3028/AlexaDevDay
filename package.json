@@ -1,0 +1,23 @@
+{
+  "name": "AlexaDevDay",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jono3028/AlexaDevDay.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/jono3028/AlexaDevDay/issues"
+  },
+  "homepage": "https://github.com/jono3028/AlexaDevDay#readme",
+  "dependencies": {
+    "alexa-sdk": "^1.0.11"
+  }
+}
